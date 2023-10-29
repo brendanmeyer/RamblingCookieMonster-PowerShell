@@ -241,10 +241,10 @@
                     $hash[$hashName] = $expressionValue
                 }
                 else {
-                    foreach ($itemProperty in $item.psobject.Properties) {
-                        if ($itemProperty.Name -like $property) {
-                            $hash[$itemProperty.Name] = $itemProperty.Value
-                        }
+                    $propertiesToCopy = $item.psobject.Properties.Name -like $property
+                    foreach ($propertyName in $propertiesToCopy) {
+                        $itemProperty = $item.psobject.Properties.Item($propertyName)
+                        $hash[$itemProperty.Name] = $itemProperty.Value
                     }
                 }
             }
