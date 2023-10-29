@@ -206,10 +206,10 @@
         [object[]] $Right,
 
         [Parameter(Mandatory = $true)]
-        [string] $LeftJoinProperty,
+        [string[]] $LeftJoinPropertys,
 
         [Parameter(Mandatory = $true)]
-        [string] $RightJoinProperty,
+        [string[]] $RightJoinPropertys,
 
         [object[]]$LeftProperties = '*',
 
@@ -344,7 +344,12 @@
     }
     End {
         foreach ($item in $Right) {
-            $key = $item.$RightJoinProperty
+            if ($RightJoinPropertys.Length -gt 1) {
+                $key = $RightJoinPropertys.ForEach({ $item.$_ }) -join "|"
+            }
+            else {
+                $key = $item.$RightJoinPropertys
+            }
 
             if ($null -eq $key) {
                 $key = $nullKey
@@ -361,7 +366,12 @@
         }
 
         foreach ($item in $LeftData) {
-            $key = $item.$LeftJoinProperty
+            if ($LeftJoinPropertys.Length -gt 1) {
+                $key = $LeftJoinPropertys.ForEach({ $item.$_ }) -join "|"
+            }
+            else {
+                $key = $item.$LeftJoinPropertys
+            }
 
             if ($null -eq $key) {
                 $key = $nullKey
@@ -400,11 +410,11 @@
             }
         }
 
-        $AllProps = $AllProps | Select -Unique
+        $AllProps = $AllProps | Select-Object -Unique
 
         Write-Verbose "Combined set of properties: $($AllProps -join ', ')"
 
-        foreach ( $entry in $leftHash.GetEnumerator() ) {
+        foreach ($entry in $leftHash.GetEnumerator()) {
             $key = $entry.Key
             $leftBucket = $entry.Value
 
@@ -413,14 +423,14 @@
             if ($null -eq $rightBucket) {
                 if ($Type -eq 'AllInLeft' -or $Type -eq 'AllInBoth') {
                     foreach ($leftItem in $leftBucket) {
-                        WriteJoinObjectOutput $leftItem $null $LeftProperties $RightProperties | Select $AllProps
+                        WriteJoinObjectOutput $leftItem $null $LeftProperties $RightProperties | Select-Object $AllProps
                     }
                 }
             }
             else {
                 foreach ($leftItem in $leftBucket) {
                     foreach ($rightItem in $rightBucket) {
-                        WriteJoinObjectOutput $leftItem $rightItem $LeftProperties $RightProperties | Select $AllProps
+                        WriteJoinObjectOutput $leftItem $rightItem $LeftProperties $RightProperties | Select-Object $AllProps
                     }
                 }
             }
@@ -435,7 +445,7 @@
 
                 if ($null -eq $leftBucket) {
                     foreach ($rightItem in $rightBucket) {
-                        WriteJoinObjectOutput $null $rightItem $LeftProperties $RightProperties | Select $AllProps
+                        WriteJoinObjectOutput $null $rightItem $LeftProperties $RightProperties | Select-Object $AllProps
                     }
                 }
             }
