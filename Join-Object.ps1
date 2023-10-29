@@ -293,6 +293,10 @@
             New-Object psobject -Property $properties
         }
 
+        if ($LeftJoinPropertys.Length -ne $RightJoinPropertys.Length) {
+            Throw "Left and Right property counts to join on do not match.`n The number of properties to join on in each Object need to match."
+        }
+
         #Translate variations on calculated properties.  Doing this once shouldn't affect perf too much.
         foreach ($Prop in @($LeftProperties + $RightProperties)) {
             if ($Prop -as [hashtable]) {
@@ -304,7 +308,7 @@
                     }
                 }
                 if (-not $Prop.ContainsKey('Name') -or $Prop['Name'] -like $null ) {
-                    Throw "Property is missing a name`n. This should be in calculated property format, with a Name and an Expression:`n@{Name='Something';Expression={`$_.Something}}`nAffected property:`n$($Prop | out-string)"
+                    Throw "Property is missing a name.`n This should be in calculated property format, with a Name and an Expression:`n@{Name='Something';Expression={`$_.Something}}`nAffected property:`n$($Prop | out-string)"
                 }
 
 
